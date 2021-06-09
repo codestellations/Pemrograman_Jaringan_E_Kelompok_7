@@ -45,6 +45,8 @@ class Chat:
 					usernamelist.append(u)
 				usernamefrom = self.sessions[sessionid]['username']
 				usernamelist.append(usernamefrom)
+				if('\r\n' in usernamelist):
+					usernamelist.remove('\r\n')
 				logging.warning("CREATE: session {} group message {} with {}" . format(sessionid, groupname, usernamelist))
 				return self.create_group_message(sessionid, groupname, usernamelist)
 			# send group message
@@ -106,10 +108,10 @@ class Chat:
 
 		group_username_list = []
 		for u in username_list:
+			if(self.get_user(u) == False):
+				print(self.get_user(u))
+				return {'status': 'ERROR', 'message': 'User Tidak Ditemukan'}
 			group_username_list.append(self.get_user(u))
-
-		if (group_username_list == False):
-			return {'status': 'ERROR', 'message': 'User Tidak Ditemukan'}
 
 		self.group[group_name] = group_username_list
 
@@ -127,7 +129,7 @@ class Chat:
 
 		message = {'msg_from': s_fr['nama'], 'msg_to': groupname, 'msg': message}
 		for u in s_to:
-			#if(u != s_fr):
+			if(u != s_fr):
 				outqueue_sender = s_fr['outgoing']
 				inqueue_receiver = u['incoming']
 				try:

@@ -28,6 +28,24 @@ class ChatClient:
                 return self.sendmessage(usernameto,message)
             elif (command=='inbox'):
                 return self.inbox()
+            # create group message
+            elif (command=='creategroup'):
+                groupname = j[1].strip()
+                usernamelist = []
+                for u in j[2:]:
+                    usernamelist.append(u)
+                # if(usernamelist):
+                #     usernamefrom = self.username
+                #     usernamelist.append(usernamefrom)
+                print(usernamelist)
+                return self.creategroup(groupname, usernamelist)
+            # send group message
+            elif (command=='sendgroup'):
+                groupname = j[1].strip()
+                message = ""
+                for w in j[2:]:
+                    message = "{} {}".format(message, w)
+                return self.sendgroup(groupname, message)
             else:
                 return "*Maaf, command tidak benar"
         except IndexError:
@@ -75,6 +93,32 @@ class ChatClient:
         else:
             return "Error, {}" . format(result['message'])
 
+    # create group message
+    def creategroup(self,groupname="xxx",usernamelist=[]):
+        if(usernamelist==[]):
+            return "Error, no user added"
+        usernameTo = ' '.join(map(str, usernamelist))
+        if (self.tokenid==""):
+            return "Error, not authorized"
+        string="creategroup {} {} {} \r\n" . format(self.tokenid,groupname,usernameTo)
+        print(string)
+        result = self.sendstring(string)
+        if result['status']=='OK':
+            return "Group {} created" . format(groupname)
+        else:
+            return "Error, {}" . format(result['message'])
+
+    # send group message
+    def sendgroup(self,groupname="xxx",message="xxx"):
+        if (self.tokenid==""):
+            return "Error, not authorized"
+        string="sendgroup {} {} {} \r\n" . format(self.tokenid,groupname,message)
+        print(string)
+        result = self.sendstring(string)
+        if result['status']=='OK':
+            return "message sent to {}" . format(groupname)
+        else:
+            return "Error, {}" . format(result['message'])
 
 
 if __name__=="__main__":
