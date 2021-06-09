@@ -12,6 +12,7 @@ class Chat:
 		self.users['messi']={ 'nama': 'Lionel Messi', 'negara': 'Argentina', 'password': 'surabaya', 'incoming' : {}, 'outgoing': {}}
 		self.users['henderson']={ 'nama': 'Jordan Henderson', 'negara': 'Inggris', 'password': 'surabaya', 'incoming': {}, 'outgoing': {}}
 		self.users['lineker']={ 'nama': 'Gary Lineker', 'negara': 'Inggris', 'password': 'surabaya','incoming': {}, 'outgoing':{}}
+		self.group = {}
 	def proses(self,data):
 		j=data.split(" ")
 		try:
@@ -35,6 +36,27 @@ class Chat:
 				username = self.sessions[sessionid]['username']
 				logging.warning("INBOX: {}" . format(sessionid))
 				return self.get_inbox(username)
+			# create group message
+			elif (command=='creategroup'):
+				sessionid = j[1].strip()
+				groupname = j[2].strip()
+				usernamelist = []
+				for u in j[3:]:
+					usernamelist.append(u)
+				usernamefrom = self.sessions[sessionid]['username']
+				usernamelist.append(usernamefrom)
+				logging.warning("CREATE: session {} group message {} with {}" . format(sessionid, groupname, usernamelist))
+				return self.create_group_message(sessionid, groupname, usernamelist)
+			# send group message
+			elif (command=='sendgroup'):
+				sessionid = j[1].strip()
+				groupname = j[2].strip()
+				message=""
+				for w in j[3:]:
+					message="{} {}" . format(message,w)
+				usernamefrom = self.sessions[sessionid]['username']
+				logging.warning("SEND: session {} send group message from {} to {}" . format(sessionid, usernamefrom,groupname))
+				return self.send_group_message(sessionid, usernamefrom, groupname, message)
 			else:
 				return {'status': 'ERROR', 'message': '**Protocol Tidak Benar'}
 		except KeyError:
@@ -77,6 +99,56 @@ class Chat:
 			inqueue_receiver[username_from].put(message)
 		return {'status': 'OK', 'message': 'Message Sent'}
 
+	# create group message
+	def create_group_message(self, sessionid, group_name, username_list):
+		if (sessionid not in self.sessions):
+			return {'status': 'ERROR', 'message': 'Session Tidak Ditemukan'}
+
+		group_username_list = []
+		for u in username_list:
+			group_username_list.append(self.get_user(u))
+
+		if (group_username_list == False):
+			return {'status': 'ERROR', 'message': 'User Tidak Ditemukan'}
+
+		self.group[group_name] = group_username_list
+
+		return {'status': 'OK', 'message': 'Group Created'}
+
+	# send group message
+	def send_group_message(self, sessionid, username_from, groupname, message):
+		if (sessionid not in self.sessions):
+			return {'status': 'ERROR', 'message': 'Session Tidak Ditemukan'}
+		s_fr = self.get_user(username_from)
+		s_to = self.get_group_user(groupname)
+
+		if (s_fr == False or s_to == False):
+			return {'status': 'ERROR', 'message': 'User atau Group Tidak Ditemukan'}
+
+		message = {'msg_from': s_fr['nama'], 'msg_to': groupname, 'msg': message}
+		for u in s_to:
+			#if(u != s_fr):
+				outqueue_sender = s_fr['outgoing']
+				inqueue_receiver = u['incoming']
+				try:
+					outqueue_sender[username_from].put(message)
+				except KeyError:
+					outqueue_sender[username_from] = Queue()
+					outqueue_sender[username_from].put(message)
+				try:
+					inqueue_receiver[username_from].put(message)
+				except KeyError:
+					inqueue_receiver[username_from] = Queue()
+					inqueue_receiver[username_from].put(message)
+
+		return {'status': 'OK', 'message': 'Group Message Sent'}
+
+	# get group user
+	def get_group_user(self,groupname):
+		if (groupname not in self.group):
+			return False
+		return self.group[groupname]
+
 	def get_inbox(self,username):
 		s_fr = self.get_user(username)
 		incoming = s_fr['incoming']
@@ -93,34 +165,20 @@ if __name__=="__main__":
 	j = Chat()
 	sesi = j.proses("auth messi surabaya")
 	print(sesi)
-	#sesi = j.autentikasi_user('messi','surabaya')
 	#print sesi
 	tokenid = sesi['tokenid']
-	print(j.proses("send {} henderson hello gimana kabarnya son " . format(tokenid)))
-	print(j.proses("send {} messi hello gimana kabarnya mess " . format(tokenid)))
 
-	#print j.send_message(tokenid,'messi','henderson','hello son')
-	#print j.send_message(tokenid,'henderson','messi','hello si')
-	#print j.send_message(tokenid,'lineker','messi','hello si dari lineker')
-
-
+	# group message test
+	# create group message
+	print(j.proses("creategroup {} tesgroup henderson lineker" . format(tokenid)))
+	# send group message
+	print(j.proses("sendgroup {} tesgroup halo semua" . format(tokenid)))
+	sesi = j.proses("auth henderson surabaya")
+	tokenid = sesi['tokenid']
+	print(j.proses("sendgroup {} tesgroup halo juga".format(tokenid)))
 	print("isi mailbox dari messi")
 	print(j.get_inbox('messi'))
 	print("isi mailbox dari henderson")
 	print(j.get_inbox('henderson'))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	print("isi mailbox dari lineker")
+	print(j.get_inbox('lineker'))
