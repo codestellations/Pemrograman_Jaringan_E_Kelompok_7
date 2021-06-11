@@ -12,6 +12,7 @@ class ChatClient:
         self.server_address = (TARGET_IP,TARGET_PORT)
         self.sock.connect(self.server_address)
         self.tokenid=""
+
     def proses(self,cmdline):
         j=cmdline.split(" ")
         try:
