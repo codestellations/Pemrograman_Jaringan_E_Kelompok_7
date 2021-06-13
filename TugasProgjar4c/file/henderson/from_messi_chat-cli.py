@@ -1,7 +1,6 @@
 import socket
 import os
 import json
-import base64
 
 TARGET_IP = "127.0.0.1"
 TARGET_PORT = 8889
@@ -48,23 +47,6 @@ class ChatClient:
                 for w in j[2:]:
                     message = "{} {}".format(message, w)
                 return self.sendgroup(groupname, message)
-            # send file
-            elif (command=='sendfile'):
-                usernameto = j[1].strip()
-                filepath = j[2].strip()
-                for w in j[3:]:
-                    filepath = "{} {}".format(filepath, w)
-
-                filename = os.path.basename(filepath)
-                filename = filename.replace(" ", "-")
-                print(filepath)
-
-                data = open(filepath, 'rb').read()
-                print(data)
-                filedata = base64.b64encode(data)       # convert to base64
-                filedata = filedata.decode('utf-8')     # convert to str from bytes
-
-                return self.sendfile(usernameto, filename, filedata)
             else:
                 return "*Maaf, command tidak benar"
         except IndexError:
@@ -139,17 +121,6 @@ class ChatClient:
         else:
             return "Error, {}" . format(result['message'])
 
-    # send file
-    def sendfile(self,usernameto="xxx",filename="xxx", filedata="xxx"):
-        if (self.tokenid==""):
-            return "Error, not authorized"
-        string="sendfile {} {} {} {}\r\n" . format(self.tokenid,usernameto,filename,filedata)
-        print(string)
-        result = self.sendstring(string)
-        if result['status']=='OK':
-            return "message sent to {}" . format(usernameto)
-        else:
-            return "Error, {}" . format(result['message'])
 
 if __name__=="__main__":
     cc = ChatClient()

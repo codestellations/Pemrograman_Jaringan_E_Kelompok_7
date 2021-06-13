@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import base64
 import uuid
 import logging
 from queue import  Queue
@@ -59,6 +60,15 @@ class Chat:
 				usernamefrom = self.sessions[sessionid]['username']
 				logging.warning("SEND: session {} send group message from {} to {}" . format(sessionid, usernamefrom,groupname))
 				return self.send_group_message(sessionid, usernamefrom, groupname, message)
+			# send file
+			elif (command=='sendfile'):
+				sessionid = j[1].strip()
+				usernameto = j[2].strip()
+				filename = j[3].strip()
+				filedata = str.encode(j[4].strip())
+				usernamefrom = self.sessions[sessionid]['username']
+				logging.warning("SEND: session {} send file from {} to {}".format(sessionid, usernamefrom, usernameto))
+				return self.send_file(sessionid, usernamefrom, usernameto, filename, filedata)
 			else:
 				return {'status': 'ERROR', 'message': '**Protocol Tidak Benar'}
 		except KeyError:
@@ -151,6 +161,30 @@ class Chat:
 			return False
 		return self.group[groupname]
 
+	# send file
+	def send_file(self, sessionid, username_from, username_dest, filename, filedata):
+		if (sessionid not in self.sessions):
+			return {'status': 'ERROR', 'message': 'Session Tidak Ditemukan'}
+		s_fr = self.get_user(username_from)
+		s_to = self.get_user(username_dest)
+
+		if (s_fr == False or s_to == False):
+			return {'status': 'ERROR', 'message': 'User Tidak Ditemukan'}
+
+		dirname = './file/' + username_dest
+
+		if (os.path.isdir(dirname) == False):
+			os.mkdir(dirname)
+			print('Direktori file/' + username_dest + ' berhasil dibuat')
+
+		name = dirname + '/from_' + username_from + '_' + filename
+		file_to = open(name, 'wb')
+
+		decoded = base64.b64decode(filedata)
+		file_to.write(decoded)
+
+		return {'status': 'OK', 'message': 'File Sent'}
+
 	def get_inbox(self,username):
 		s_fr = self.get_user(username)
 		incoming = s_fr['incoming']
@@ -167,20 +201,26 @@ if __name__=="__main__":
 	j = Chat()
 	sesi = j.proses("auth messi surabaya")
 	print(sesi)
-	#print sesi
 	tokenid = sesi['tokenid']
+
+	filename = './chat-cli.py'
+	data = open(filename, 'rb').read()
+	encoded = base64.b64encode(data)
+	encoded = encoded.decode('utf-8') # convert from bytes to str
+
+	print(j.proses("sendfile {} henderson {} {} ".format(tokenid,os.path.basename(filename),encoded)))
 
 	# group message test
 	# create group message
-	print(j.proses("creategroup {} tesgroup henderson lineker" . format(tokenid)))
+	# print(j.proses("creategroup {} tesgroup henderson lineker" . format(tokenid)))
 	# send group message
-	print(j.proses("sendgroup {} tesgroup halo semua" . format(tokenid)))
-	sesi = j.proses("auth henderson surabaya")
-	tokenid = sesi['tokenid']
-	print(j.proses("sendgroup {} tesgroup halo juga".format(tokenid)))
-	print("isi mailbox dari messi")
-	print(j.get_inbox('messi'))
-	print("isi mailbox dari henderson")
-	print(j.get_inbox('henderson'))
-	print("isi mailbox dari lineker")
-	print(j.get_inbox('lineker'))
+	# print(j.proses("sendgroup {} tesgroup halo semua" . format(tokenid)))
+	# sesi = j.proses("auth henderson surabaya")
+	# tokenid = sesi['tokenid']
+	# print(j.proses("sendgroup {} tesgroup halo juga".format(tokenid)))
+	# print("isi mailbox dari messi")
+	# print(j.get_inbox('messi'))
+	# print("isi mailbox dari henderson")
+	# print(j.get_inbox('henderson'))
+	# print("isi mailbox dari lineker")
+	# print(j.get_inbox('lineker'))
