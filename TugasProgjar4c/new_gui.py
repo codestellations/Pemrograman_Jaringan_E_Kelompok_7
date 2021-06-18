@@ -1,9 +1,12 @@
 import tkinter as tk
 import os
+from chatclient import ChatClient
 
 root = tk.Tk()
+chatClient = ChatClient()
 
 users = ["Messi", "Arman", "Lana", "Kiko"]
+#users = chatClient.getallusers()
 groups = []
 
 auth = "Selena"
@@ -18,11 +21,15 @@ class functions:
         username = uname.get()
         password = pw.get()
 
-        print("auth by " + username + " with password " + password)
-
-        frame.destroy()
-
-        ui.chat(self)
+        cmd = str(f"auth {uname.get()} {pw.get()}")
+        result = chatClient.proses(cmd)
+        result.split()
+        if result[0]=='E':
+            print("Wrong username or password")
+        else:
+            print("auth by " + username + " with password " + password)
+            frame.destroy()
+            ui.chat(self)
 
     def sendfile(self):
         #send file function
