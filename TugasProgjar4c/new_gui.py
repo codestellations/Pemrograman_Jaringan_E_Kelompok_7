@@ -5,11 +5,11 @@ from chat_client import ChatClient
 root = tk.Tk()
 chatClient = ChatClient()
 
-users = ["Messi", "Arman", "Lana", "Kiko"]
-#users = chatClient.getallusers()
+#users = ["Messi", "Arman", "Lana", "Kiko"]
+users = []
 groups = []
 
-auth = "Selena"
+auth = ""
 
 class functions:
     def __init__(self, root=None, ui=None):
@@ -28,17 +28,27 @@ class functions:
             print("Wrong username or password")
         else:
             print("auth by " + username + " with password " + password)
+            # get all users
             frame.destroy()
-            ui.chat(self)
+            ui.chat(self, username)
 
     def sendfile(self):
         #send file function
         print("sending file")
 
-    def sendtext(self, ui, chatbox, box):
-        #send file function
+    def sendtext(self, ui, chatbox, box, auth, user):
+        #send text function
         input = chatbox.get("1.0", "end-1c")
         print(input)
+
+        cmd = str(f"send {user} {input}")
+        result = chatClient.proses(cmd)
+        result.split()
+        if result[0] == 'E':
+            print("Chat failed to send")
+        else:
+            print("Chat sent!")
+
         ui.chatbubble(input, auth, box)
         chatbox.delete("1.0", "end-1c")
 
@@ -94,7 +104,7 @@ class interfaces:
                                 command=lambda: func.login(self, frame, usernameform, passwordform))
         loginbutton.pack(side=tk.BOTTOM, anchor=tk.S, pady=20)
 
-    def chat(self, func):
+    def chat(self, func, auth):
         # canvas = tk.Canvas(root, height=700, width=1000, bg="#22223b")
         # canvas.pack()
 
@@ -119,11 +129,14 @@ class interfaces:
         rightframe = tk.Frame(frame, height=100, width=150, bg="#4a4e69")
         rightframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=True)
 
-        self.singlechat(func, leftframe, rightframe)
+        self.singlechat(func, leftframe, rightframe, auth)
 
-    def singlechat(self, func, frame, rightframe):
+    def singlechat(self, func, frame, rightframe, auth):
         userbutton = []
         userchat = []
+
+        users = chatClient.proses("getallusers")
+        users = [*users]
 
         for x in range(len(users)):
             userchat.append(tk.Frame(rightframe, height=100, width=150, bg="#4A4E69"))
@@ -131,12 +144,14 @@ class interfaces:
             userchat[x].pack_forget()
 
             userbutton.append(tk.Button(frame, text=users[x], anchor='w',
-                                        command=lambda y=users[x], z=userchat[x]: self.personalchat(func, y, z)))
+                                        command=lambda y=users[x], z=userchat[x]: self.personalchat(func, y, z, auth)))
             userbutton[x].pack(side=tk.TOP, anchor=tk.NW, fill=tk.X, padx=10, pady=5)
 
-    def personalchat(self, func, user, rightframe):
+    def personalchat(self, func, user, rightframe, auth):
         print("pc dengan ", user)
 
+        #chatmessage = chatClient.proses("inbox")
+        #print(chatmessage)
         content = ["Halo lagi apa?", "Udah makan belum?", "Mau minta saran dong",
                    "Saran apa", "Makan mi goreng apa rebus ya?"]
         sender = [user, user, user, auth, user]
@@ -175,7 +190,7 @@ class interfaces:
 
         # send text
         filebutton = tk.Button(buttonframe, text="Send", padx=22, pady=5, font=("Poppins", 10),
-                                fg="#22223b", bg="#9a8c98", command=lambda: func.sendtext(self, chatbox, chatframe))
+                                fg="#22223b", bg="#9a8c98", command=lambda: func.sendtext(self, chatbox, chatframe, auth, user))
         filebutton.pack(side=tk.TOP, anchor=tk.SW)
 
         # send file

@@ -65,6 +65,12 @@ class ChatClient:
                 filedata = filedata.decode('utf-8')     # convert to str from bytes
 
                 return self.sendfile(usernameto, filename, filedata)
+            elif (command=='outbox'):
+                return self.outbox()
+            elif (command == 'getallusers'):
+                return self.getallusers()
+            elif (command == 'getallgroups'):
+                return self.getallgroups()
             else:
                 return "*Maaf, command tidak benar"
         except IndexError:
@@ -150,6 +156,33 @@ class ChatClient:
             return "message sent to {}" . format(usernameto)
         else:
             return "Error, {}" . format(result['message'])
+
+    # get outbox
+    def outbox(self):
+        if (self.tokenid==""):
+            return "Error, not authorized"
+        string="outbox {} \r\n" . format(self.tokenid)
+        result = self.sendstring(string)
+        if result['status']=='OK':
+            return "{}" . format(json.dumps(result['messages']))
+        else:
+            return "Error, {}" . format(result['message'])
+
+    # get all users
+    def getallusers(self):
+        if (self.tokenid==""):
+            return "Error, not authorized"
+        string="getallusers {} \r\n" . format(self.tokenid)
+        result = self.sendstring(string)
+        return result
+
+    # get all groups
+    def getallgroups(self):
+        if (self.tokenid == ""):
+            return "Error, not authorized"
+        string = "getallgroups {} \r\n".format(self.tokenid)
+        result = self.sendstring(string)
+        return result
 
 if __name__=="__main__":
     cc = ChatClient()

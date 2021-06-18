@@ -14,6 +14,7 @@ class Chat:
 		self.users['henderson']={ 'nama': 'Jordan Henderson', 'negara': 'Inggris', 'password': 'surabaya', 'incoming': {}, 'outgoing': {}}
 		self.users['lineker']={ 'nama': 'Gary Lineker', 'negara': 'Inggris', 'password': 'surabaya','incoming': {}, 'outgoing':{}}
 		self.group = {}
+		self.group['grup 3']= {'messi', 'henderson', 'lineker'}
 	def proses(self,data):
 		j=data.split(" ")
 		try:
@@ -69,6 +70,24 @@ class Chat:
 				usernamefrom = self.sessions[sessionid]['username']
 				logging.warning("SEND: session {} send file from {} to {}".format(sessionid, usernamefrom, usernameto))
 				return self.send_file(sessionid, usernamefrom, usernameto, filename, filedata)
+			# get outbox
+			elif (command=='outbox'):
+				sessionid = j[1].strip()
+				username = self.sessions[sessionid]['username']
+				logging.warning("OUTBOX: {}" . format(sessionid))
+				return self.get_outbox(username)
+			# get all users
+			elif (command=='getallusers'):
+				sessionid = j[1].strip()
+				username = self.sessions[sessionid]['username']
+				logging.warning("GET ALL USERS: {}" . format(sessionid))
+				return self.get_all_users()
+			# get all groups
+			elif (command=='getallgroups'):
+				sessionid = j[1].strip()
+				username = self.sessions[sessionid]['username']
+				logging.warning("GET ALL GROUPS: {}" . format(sessionid))
+				return self.get_all_groups(username)
 			else:
 				return {'status': 'ERROR', 'message': '**Protocol Tidak Benar'}
 		except KeyError:
@@ -193,9 +212,25 @@ class Chat:
 			msgs[users]=[]
 			while not incoming[users].empty():
 				msgs[users].append(s_fr['incoming'][users].get_nowait())
-			
+
 		return {'status': 'OK', 'messages': msgs}
 
+	def get_outbox(self, username):
+		s_fr = self.get_user(username)
+		outgoing = s_fr['outgoing']
+		msgs = {}
+		for users in outgoing:
+			msgs[users] = []
+			while not outgoing[users].empty():
+				msgs[users].append(s_fr['outgoing'][users].get_nowait())
+
+		return {'status': 'OK', 'messages': msgs}
+
+	def get_all_users(self):
+		return self.users
+
+	def get_all_groups(self, username):
+		return self.group
 
 if __name__=="__main__":
 	j = Chat()
@@ -203,7 +238,7 @@ if __name__=="__main__":
 	print(sesi)
 	tokenid = sesi['tokenid']
 
-	filename = './chat-cli.py'
+	filename = './chat_client.py'
 	data = open(filename, 'rb').read()
 	encoded = base64.b64encode(data)
 	encoded = encoded.decode('utf-8') # convert from bytes to str
@@ -213,13 +248,16 @@ if __name__=="__main__":
 	# group message test
 	# create group message
 	# print(j.proses("creategroup {} tesgroup henderson lineker" . format(tokenid)))
+	# print(j.get_group_user("grup 3"))
 	# send group message
 	# print(j.proses("sendgroup {} tesgroup halo semua" . format(tokenid)))
 	# sesi = j.proses("auth henderson surabaya")
 	# tokenid = sesi['tokenid']
 	# print(j.proses("sendgroup {} tesgroup halo juga".format(tokenid)))
+	# print(j.proses("send {} henderson hello gimana kabarnya " . format(tokenid)))
 	# print("isi mailbox dari messi")
 	# print(j.get_inbox('messi'))
+	# print(j.get_outbox('messi'))
 	# print("isi mailbox dari henderson")
 	# print(j.get_inbox('henderson'))
 	# print("isi mailbox dari lineker")
