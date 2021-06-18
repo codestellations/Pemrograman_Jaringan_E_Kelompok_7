@@ -1,6 +1,6 @@
 import tkinter as tk
 import os
-from chatclient import ChatClient
+from chat_client import ChatClient
 
 root = tk.Tk()
 chatClient = ChatClient()
