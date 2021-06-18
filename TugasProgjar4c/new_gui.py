@@ -123,6 +123,7 @@ class interfaces:
         loginbutton.pack(side=tk.BOTTOM, anchor=tk.S, pady=20)
 
     def chat(self, auth):
+        self.auth = auth
         # canvas = tk.Canvas(root, height=700, width=1000, bg="#22223b")
         # canvas.pack()
 
@@ -134,7 +135,7 @@ class interfaces:
         self.leftframe = tk.Frame(self.frame, height=100, width=250, bg="#9a8c98")
         self.leftframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.Y)
 
-        logintext = tk.Label(self.leftframe, text=("Welcome, " + auth), font=("Poppins Medium", 18),
+        logintext = tk.Label(self.leftframe, text=("Welcome, " + self.auth), font=("Poppins Medium", 18),
                              bg="#9a8c98", fg="#f2e9e4")
         logintext.pack(side=tk.TOP, anchor=tk.NW, padx=10, pady=10)
 
@@ -151,7 +152,7 @@ class interfaces:
         self.rightframe = tk.Frame(self.frame, height=100, width=150, bg="#4a4e69")
         self.rightframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=True)
 
-        self.users = self.singlechat(self.leftframe, auth)
+        self.users = self.singlechat(self.leftframe, self.auth)
         self.newgroup(groupframe)
 
     def singlechat(self, frame, auth):
@@ -161,7 +162,6 @@ class interfaces:
         users = chatClient.proses("getallusers")
         users = json.loads(users)
         # users = [*users]
-        print(users)
 
         for x in range(len(users)):
             # userchat.append(tk.Frame(self.rightframe, height=100, width=150, bg="#4A4E69"))
@@ -176,7 +176,7 @@ class interfaces:
         return users
 
     def personalchat(self, user, auth):
-        print("pc dengan ", user)
+        print("pc dengan ", user, " auth ", auth)
 
         content = ["Halo lagi apa?", "Udah makan belum?", "Mau minta saran dong",
                    "Saran apa", "Makan mi goreng apa rebus ya?"]
@@ -226,6 +226,7 @@ class interfaces:
     def chatbubble(self, content, name, box):
         if not content.isspace() and content.strip() != '':
             box.configure(state="normal")
+            # namestring = ' '.join(name)
 
             textchat = (name + " : " + content + os.linesep)
 
@@ -247,8 +248,6 @@ class interfaces:
     def newgroup(self, groupframe):
         userlist = []
         self.var = []
-
-        print(self.users)
 
         groupframe.pack(side=tk.BOTTOM, anchor=tk.SW, fill=tk.X)
 
@@ -282,8 +281,8 @@ class interfaces:
         groupframe.pack_forget()
 
         groupbutton = tk.Button(self.leftframe, text=groups[-1], anchor='w',
-                                    command=lambda: self.personalchat("group", auth))
-                                    # command=lambda y=users[x], z=userchat[x]: self.personalchat(y, z, auth)))
+                                # command=lambda: self.personalchat(groups[-1], auth))
+                                command=lambda: self.personalchat("group", self.auth))
         groupbutton.pack(side=tk.TOP, anchor=tk.NW, fill=tk.X, padx=10, pady=5)
 
 if __name__=="__main__":
