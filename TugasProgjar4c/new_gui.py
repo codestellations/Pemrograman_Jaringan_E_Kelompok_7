@@ -127,31 +127,31 @@ class interfaces:
         # canvas.pack()
 
         # base frame
-        frame = tk.Frame(root, bg="#4A4E69")
-        frame.place(relwidth=0.8, relheight=0.8, relx=0.1, rely=0.1)
+        self.frame = tk.Frame(root, bg="#4A4E69")
+        self.frame.place(relwidth=0.8, relheight=0.8, relx=0.1, rely=0.1)
 
         # left frame
-        leftframe = tk.Frame(frame, height=100, width=250, bg="#9a8c98")
-        leftframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.Y)
+        self.leftframe = tk.Frame(self.frame, height=100, width=250, bg="#9a8c98")
+        self.leftframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.Y)
 
-        logintext = tk.Label(leftframe, text=("Welcome, " + auth), font=("Poppins Medium", 18),
+        logintext = tk.Label(self.leftframe, text=("Welcome, " + auth), font=("Poppins Medium", 18),
                              bg="#9a8c98", fg="#f2e9e4")
         logintext.pack(side=tk.TOP, anchor=tk.NW, padx=10, pady=10)
 
         # group frame
-        groupframe = tk.LabelFrame(leftframe, height=200, width=250,
+        groupframe = tk.LabelFrame(self.leftframe, height=200, width=250,
                                    text="Group chat", bg="#c9ada7")
 
         # new group button
-        newgroup = tk.Button(leftframe, text="New Group", padx=5, font=("Poppins", 10),
+        newgroup = tk.Button(self.leftframe, text="New Group", padx=5, font=("Poppins", 10),
                              fg="#22223b", bg="#9a8c98", command=lambda: self.grouptoggle(groupframe))
         newgroup.pack(side=tk.BOTTOM, anchor=tk.S, pady=5)
 
         # right frame
-        self.rightframe = tk.Frame(frame, height=100, width=150, bg="#4a4e69")
+        self.rightframe = tk.Frame(self.frame, height=100, width=150, bg="#4a4e69")
         self.rightframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=True)
 
-        self.users = self.singlechat(leftframe, auth)
+        self.users = self.singlechat(self.leftframe, auth)
         self.newgroup(groupframe)
 
     def singlechat(self, frame, auth):
@@ -191,36 +191,36 @@ class interfaces:
         # new chat
         chatframe = tk.Text(self.rightframe, state="disabled", bg="#4A4E69", fg="#f2e9e4",
                             padx=5, pady=5, font=("Inconsolata", 11))
-        chatframe.place(x=5, y=55, width=545, height=400)
+        chatframe.place(x=5, y=55, width=570, height=380)
 
         # for existing messages
         for x in range(len(content)):
             self.chatbubble(content[x], sender[x], chatframe)
 
         # button frame
-        buttonframe = tk.Frame(self.rightframe, height=20, width=100)
-        buttonframe.pack(side=tk.RIGHT, anchor=tk.SW)
+        self.buttonframe = tk.Frame(self.rightframe, height=20, width=100)
+        self.buttonframe.pack(side=tk.RIGHT, anchor=tk.SW)
 
         # chat box
-        boxframe = tk.Frame(self.rightframe, height=100, bg="#F2E9E4")
-        boxframe.pack(side=tk.BOTTOM, anchor=tk.S, fill=tk.X, expand=True)
+        self.boxframe = tk.Frame(self.rightframe, height=120, bg="#F2E9E4")
+        self.boxframe.pack(side=tk.BOTTOM, anchor=tk.S, fill=tk.X, expand=True)
 
-        chatbox = tk.Text(boxframe)
-        chatbox.place(x=5, y=5, width=455, height=90)
+        chatbox = tk.Text(self.boxframe)
+        chatbox.place(x=5, y=5, width=475, height=110)
 
         # send text
-        filebutton = tk.Button(buttonframe, text="Send", padx=22, pady=5, font=("Poppins", 10),
+        filebutton = tk.Button(self.buttonframe, text="Send", padx=26, font=("Poppins", 10),
                                 fg="#22223b", bg="#9a8c98", command=lambda: self.func.sendtext(self, chatbox, chatframe, auth, user))
         filebutton.pack(side=tk.TOP, anchor=tk.SW)
 
         # send file
-        filebutton = tk.Button(buttonframe, text="Send File", padx=10, pady=5, font=("Poppins", 10),
+        filebutton = tk.Button(self.buttonframe, text="Send File", padx=14, font=("Poppins", 10),
                                 fg="#22223b", bg="#9a8c98", command=lambda: self.func.sendfile())
         filebutton.pack(side=tk.TOP, anchor=tk.SW)
 
         # refresh
-        filebutton = tk.Button(buttonframe, text="Refresh Chat", padx=0, pady=5, font=("Poppins", 10),
-                               fg="#22223b", bg="#9a8c98", command=lambda: func.inbox(self, chatbox, chatframe, auth, user))
+        filebutton = tk.Button(self.buttonframe, text="Refresh Chat", padx=0, font=("Poppins", 10),
+                               fg="#22223b", bg="#9a8c98", command=lambda: self.func.inbox(self, chatbox, chatframe, auth, user))
         filebutton.pack(side=tk.TOP, anchor=tk.SW)
 
     def chatbubble(self, content, name, box):
@@ -234,9 +234,14 @@ class interfaces:
             box.configure(state="disable")
 
     def changechat(self):
-        print(self.rightframe)
-        self.rightframe.pack_forget()
+        self.rightframe.destroy()
+
+        # self.rightframe.pack_forget()
+        # self.rightframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=True)
+
+        self.rightframe = tk.Frame(self.frame, height=100, width=150, bg="#4a4e69")
         self.rightframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=True)
+
         self.rightframe.tkraise()
 
     def newgroup(self, groupframe):
@@ -275,6 +280,11 @@ class interfaces:
         print("group chat with ", temp)
 
         groupframe.pack_forget()
+
+        groupbutton = tk.Button(self.leftframe, text=groups[-1], anchor='w',
+                                    command=lambda: self.personalchat("group", auth))
+                                    # command=lambda y=users[x], z=userchat[x]: self.personalchat(y, z, auth)))
+        groupbutton.pack(side=tk.TOP, anchor=tk.NW, fill=tk.X, padx=10, pady=5)
 
 if __name__=="__main__":
     root.title("Chat App")
