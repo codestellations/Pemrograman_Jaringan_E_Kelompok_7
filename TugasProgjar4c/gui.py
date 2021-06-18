@@ -5,21 +5,43 @@ import os
 root = tk.Tk()
 
 users = ["Messi", "Arman", "Lana", "Kiko"]
+groups = []
 
 auth = "Selena"
 
-def login(frame):
+# gk bisa bikin class monmaap jadi masih bececeran fungsi-fungsi
+
+# FUNCTIONS
+def login(frame, uname, pw):
 
     # auth function
+    username = uname.get()
+    password = pw.get()
+
+    print("auth by " + username + " with password " + password)
 
     frame.destroy()
 
     chat()
 
+def sendfile():
+
+    #send file function
+    print("sending file")
+
+def sendtext(chatbox, box):
+
+    #send file function
+    input = chatbox.get("1.0", "end-1c")
+    print(input)
+    chatbubble(input, auth, box)
+    chatbox.delete("1.0", "end-1c")
+
+# INTERFACES
 def chat():
 
-    # canvas = tk.Canvas(root, height=700, width=1000, bg="#22223b")
-    # canvas.pack()
+    canvas = tk.Canvas(root, height=700, width=1000, bg="#22223b")
+    canvas.pack()
 
     # base frame
     frame = tk.Frame(root, bg="#4A4E69")
@@ -29,7 +51,7 @@ def chat():
     leftframe = tk.Frame(frame, height=100, width=250, bg="#9a8c98")
     leftframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.Y)
 
-    logintext = tk.Label(leftframe, text=auth, font=("Poppins Medium", 18),
+    logintext = tk.Label(leftframe, text=("Welcome, " + auth), font=("Poppins Medium", 18),
                          bg="#9a8c98", fg="#f2e9e4")
     logintext.pack(side=tk.TOP, anchor=tk.NW, padx=10, pady=10)
 
@@ -47,13 +69,18 @@ def chat():
 def singlechat(frame, rightframe):
 
     userbutton = []
+    userchat = []
 
     for x in range(len(users)):
+        userchat.append(tk.Frame(rightframe, height=100, width=150, bg="#4A4E69"))
+        # userchat[x].pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=True)
+        userchat[x].pack_forget()
+
         userbutton.append(tk.Button(frame, text=users[x], anchor='w',
-                                    command=lambda y=users[x]: personalchat(y, rightframe)))
+                                    command=lambda y=users[x], z=userchat[x]: personalchat(y, z)))
         userbutton[x].pack(side=tk.TOP, anchor=tk.NW, fill=tk.X, padx=10, pady=5)
 
-def personalchat(user, frame):
+def personalchat(user, rightframe):
 
     print("pc dengan ", user)
 
@@ -61,28 +88,57 @@ def personalchat(user, frame):
                "Saran apa", "Makan mi goreng apa rebus ya?"]
     sender = [user, user, user, auth, user]
 
-    rightframe = tk.Frame(frame, height=100, width=150, bg="#4A4E69")
+    rightframe.tkraise()
     rightframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=True)
 
+    # frame.tkraise()
+    # rightframe = tk.Frame(frame, height=100, width=150, bg="#4A4E69")
+    # rightframe.tkraise()
+    # rightframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=True)
+
+    logintext = tk.Label(rightframe, text=user, font=("Poppins Medium", 14),
+                         bg="#4A4E69", fg="#f2e9e4")
+    logintext.pack(side=tk.TOP, anchor=tk.NW, padx=10, pady=10)
+
+    # new chat
+    chatframe = tk.Text(rightframe, state="disabled", bg="#4A4E69", fg="#f2e9e4",
+                        padx=5, pady=5, font=("Inconsolata", 11))
+    chatframe.place(x=5, y=55, width=545, height=400)
+
+    # for existing messages
     for x in range(len(content)):
-        if (sender[x] == user):
-            leftchat(content[x], rightframe)
-        elif (sender[x] == auth):
-            rightchat(content[x], rightframe)
+        chatbubble(content[x], sender[x], chatframe)
+
+    # button
+    buttonframe = tk.Frame(rightframe, height=20, width=100)
+    buttonframe.pack(side=tk.RIGHT, anchor=tk.SW)
 
     # chat box
-    # boxframe = tk.Frame(frame, height=100, bg="#F2E9E4")
-    # boxframe.pack(side=tk.BOTTOM, anchor=tk.S, fill=tk.X, expand=True)
+    boxframe = tk.Frame(rightframe, height=100, bg="#F2E9E4")
+    boxframe.pack(side=tk.BOTTOM, anchor=tk.S, fill=tk.X, expand=True)
 
-def leftchat(content, frame):
-    text = tk.Label(frame, text=content, font=("Raleway"),
-                    bg="#4A4E69", fg="#f2e9e4")
-    text.pack(side=tk.TOP, anchor=tk.NW, padx=10, pady=5)
+    chatbox = tk.Text(boxframe)
+    chatbox.place(x=5, y=5, width=455, height=90)
 
-def rightchat(content, frame):
-    text = tk.Label(frame, text=content, font=("Raleway"),
-                    bg="#4A4E69", fg="#f2e9e4")
-    text.pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=5)
+    # send text
+    filebutton = tk.Button(buttonframe, text="Send", padx=22, pady=5, font=("Poppins", 10),
+                            fg="#22223b", bg="#9a8c98", command=lambda: sendtext(chatbox, chatframe))
+    filebutton.pack(side=tk.TOP, anchor=tk.SW)
+
+    # send file
+    filebutton = tk.Button(buttonframe, text="Send File", padx=10, pady=5, font=("Poppins", 10),
+                            fg="#22223b", bg="#9a8c98", command=lambda: sendfile())
+    filebutton.pack(side=tk.TOP, anchor=tk.SW)
+
+def chatbubble(content, name, box):
+    if not content.isspace() and content.strip() != '':
+        box.configure(state="normal")
+
+        textchat = (name + " : " + content + os.linesep)
+
+        box.insert("end", textchat)
+
+        box.configure(state="disable")
 
 def landing():
 
@@ -122,16 +178,17 @@ def landing():
 
     # login button
     loginbutton = tk.Button(frame, text="Login", padx=20, pady=5, font="Poppins",
-                            fg="#22223b", bg="#9a8c98", command=lambda: login(frame))
+                            fg="#22223b", bg="#9a8c98",
+                            command=lambda: login(frame, usernameform, passwordform))
     loginbutton.pack(side=tk.BOTTOM, anchor=tk.S, pady=20)
 
 def main():
 
     root.title("Chat App")
 
-    landing()
+    # landing()
 
-    # chat()
+    chat()
 
     root.mainloop()
 
