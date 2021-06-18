@@ -1,6 +1,7 @@
 import tkinter as tk
 import os
 from chat_client import ChatClient
+import json
 
 root = tk.Tk()
 chatClient = ChatClient()
@@ -48,8 +49,29 @@ class functions:
             print("Chat failed to send")
         else:
             print("Chat sent!")
+            ui.chatbubble(input, auth, box)
 
-        ui.chatbubble(input, auth, box)
+        chatbox.delete("1.0", "end-1c")
+
+    def inbox(self, ui, chatbox, box, auth, user):
+        cmd = str(f"inbox")
+        result = chatClient.proses(cmd)
+        if result[0] == 'E':
+            print("Failed to get chat")
+        else:
+            print("Refresh chat!")
+            result = json.loads(result)
+            if auth in result:
+                result.update(result)
+            else:
+                result = result
+
+            for sender in result:
+                if(str(sender) == user):
+                    for i in result[sender]:
+                        input = i['msg']
+                        ui.chatbubble(input, user, box)
+
         chatbox.delete("1.0", "end-1c")
 
 class interfaces:
@@ -136,7 +158,9 @@ class interfaces:
         userchat = []
 
         users = chatClient.proses("getallusers")
-        users = [*users]
+        users = json.loads(users)
+        # users = [*users]
+        print(users)
 
         for x in range(len(users)):
             userchat.append(tk.Frame(rightframe, height=100, width=150, bg="#4A4E69"))
@@ -150,8 +174,6 @@ class interfaces:
     def personalchat(self, func, user, rightframe, auth):
         print("pc dengan ", user)
 
-        #chatmessage = chatClient.proses("inbox")
-        #print(chatmessage)
         content = ["Halo lagi apa?", "Udah makan belum?", "Mau minta saran dong",
                    "Saran apa", "Makan mi goreng apa rebus ya?"]
         sender = [user, user, user, auth, user]
@@ -196,6 +218,11 @@ class interfaces:
         # send file
         filebutton = tk.Button(buttonframe, text="Send File", padx=10, pady=5, font=("Poppins", 10),
                                 fg="#22223b", bg="#9a8c98", command=lambda: func.sendfile())
+        filebutton.pack(side=tk.TOP, anchor=tk.SW)
+
+        # refresh
+        filebutton = tk.Button(buttonframe, text="Refresh Chat", padx=0, pady=5, font=("Poppins", 10),
+                               fg="#22223b", bg="#9a8c98", command=lambda: func.inbox(self, chatbox, chatframe, auth, user))
         filebutton.pack(side=tk.TOP, anchor=tk.SW)
 
     def chatbubble(self, content, name, box):
