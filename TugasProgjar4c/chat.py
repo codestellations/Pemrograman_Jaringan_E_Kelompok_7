@@ -70,24 +70,12 @@ class Chat:
 				usernamefrom = self.sessions[sessionid]['username']
 				logging.warning("SEND: session {} send file from {} to {}".format(sessionid, usernamefrom, usernameto))
 				return self.send_file(sessionid, usernamefrom, usernameto, filename, filedata)
-			# get outbox
-			elif (command=='outbox'):
-				sessionid = j[1].strip()
-				username = self.sessions[sessionid]['username']
-				logging.warning("OUTBOX: {}" . format(sessionid))
-				return self.get_outbox(username)
 			# get all users
 			elif (command=='getallusers'):
 				sessionid = j[1].strip()
 				username = self.sessions[sessionid]['username']
 				logging.warning("GET ALL USERS: {}" . format(sessionid))
 				return self.get_all_users()
-			# get all groups
-			elif (command=='getallgroups'):
-				sessionid = j[1].strip()
-				username = self.sessions[sessionid]['username']
-				logging.warning("GET ALL GROUPS: {}" . format(sessionid))
-				return self.get_all_groups(username)
 			else:
 				return {'status': 'ERROR', 'message': '**Protocol Tidak Benar'}
 		except KeyError:
@@ -215,22 +203,10 @@ class Chat:
 
 		return {'status': 'OK', 'messages': msgs}
 
-	def get_outbox(self, username):
-		s_fr = self.get_user(username)
-		outgoing = s_fr['outgoing']
-		msgs = {}
-		for users in outgoing:
-			msgs[users] = []
-			while not outgoing[users].empty():
-				msgs[users].append(s_fr['outgoing'][users].get_nowait())
-
-		return {'status': 'OK', 'messages': msgs}
-
 	def get_all_users(self):
-		return self.users
+		users = [*self.users]
+		return {'status': 'OK', 'message': 'All Users Get', 'userlist': users}
 
-	def get_all_groups(self, username):
-		return self.group
 
 if __name__=="__main__":
 	j = Chat()
@@ -262,3 +238,4 @@ if __name__=="__main__":
 	# print(j.get_inbox('henderson'))
 	# print("isi mailbox dari lineker")
 	# print(j.get_inbox('lineker'))
+	print(j.get_all_users())

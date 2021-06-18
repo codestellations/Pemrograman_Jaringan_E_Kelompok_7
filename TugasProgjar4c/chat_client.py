@@ -157,32 +157,16 @@ class ChatClient:
         else:
             return "Error, {}" . format(result['message'])
 
-    # get outbox
-    def outbox(self):
-        if (self.tokenid==""):
-            return "Error, not authorized"
-        string="outbox {} \r\n" . format(self.tokenid)
-        result = self.sendstring(string)
-        if result['status']=='OK':
-            return "{}" . format(json.dumps(result['messages']))
-        else:
-            return "Error, {}" . format(result['message'])
-
     # get all users
     def getallusers(self):
         if (self.tokenid==""):
             return "Error, not authorized"
         string="getallusers {} \r\n" . format(self.tokenid)
         result = self.sendstring(string)
-        return result
-
-    # get all groups
-    def getallgroups(self):
-        if (self.tokenid == ""):
-            return "Error, not authorized"
-        string = "getallgroups {} \r\n".format(self.tokenid)
-        result = self.sendstring(string)
-        return result
+        if result['status']=='OK':
+            return "{}" . format(json.dumps(result['userlist']))
+        else:
+            return "Error, {}" . format(result['message'])
 
 if __name__=="__main__":
     cc = ChatClient()
