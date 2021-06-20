@@ -74,6 +74,10 @@ class functions:
 
         chatbox.delete("1.0", "end-1c")
 
+    def creategroup(self):
+        # create group function
+        print("group created")
+
 class interfaces:
     def __init__(self, master=None, app=None, root=None):
         self.func = functions(root)
@@ -284,6 +288,8 @@ class interfaces:
                                 # command=lambda: self.personalchat(groups[-1], auth))
                                 command=lambda: self.personalchat("group", self.auth))
         groupbutton.pack(side=tk.TOP, anchor=tk.NW, fill=tk.X, padx=10, pady=5)
+
+        self.func.creategroup()
 
 if __name__=="__main__":
     root.title("Chat App")
