@@ -65,8 +65,6 @@ class ChatClient:
                 filedata = filedata.decode('utf-8')     # convert to str from bytes
 
                 return self.sendfile(usernameto, filename, filedata)
-            elif (command=='outbox'):
-                return self.outbox()
             elif (command == 'getallusers'):
                 return self.getallusers()
             elif (command == 'getallgroups'):
