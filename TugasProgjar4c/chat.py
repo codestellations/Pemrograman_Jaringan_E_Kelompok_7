@@ -182,13 +182,16 @@ class Chat:
 
 		if (os.path.isdir(dirname) == False):
 			os.mkdir(dirname)
-			print('Direktori file/' + username_dest + ' berhasil dibuat')
+			# print('Direktori file/' + username_dest + ' berhasil dibuat')
 
 		name = dirname + '/from_' + username_from + '_' + filename
 		file_to = open(name, 'wb')
 
 		decoded = base64.b64decode(filedata)
 		file_to.write(decoded)
+
+		file_message = "Kamu menerima file " + filename + " dari " + username_from
+		self.send_message(sessionid, username_from, username_dest, file_message)
 
 		return {'status': 'OK', 'message': 'File Sent'}
 
@@ -234,8 +237,8 @@ if __name__=="__main__":
 	# print("isi mailbox dari messi")
 	# print(j.get_inbox('messi'))
 	# print(j.get_outbox('messi'))
-	# print("isi mailbox dari henderson")
-	# print(j.get_inbox('henderson'))
+	print("isi mailbox dari henderson")
+	print(j.get_inbox('henderson'))
 	# print("isi mailbox dari lineker")
 	# print(j.get_inbox('lineker'))
 	print(j.get_all_users())

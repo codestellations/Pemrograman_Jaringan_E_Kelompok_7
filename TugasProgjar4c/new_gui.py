@@ -3,6 +3,9 @@ import os
 from chat_client import ChatClient
 import json
 
+# import filedialog module
+from tkinter import filedialog
+
 root = tk.Tk()
 chatClient = ChatClient()
 
@@ -33,8 +36,23 @@ class functions:
             frame.destroy()
             ui.chat(username)
 
-    def sendfile(self):
+    def sendfile(self, ui, chatbox, box, auth, user):
         #send file function
+        filename = filedialog.askopenfilename(initialdir="./", title="Select a File",
+                                              filetypes=[("All files","*.*")])
+
+        cmd = str(f"sendfile {user} {filename}")
+        result = chatClient.proses(cmd)
+
+        file = os.path.basename(filename)
+        m = str(f"Saya mengirimkan file {file}")
+
+        if result[0] == 'E':
+            print("File failed to send")
+        else:
+            print("File sent!")
+            ui.chatbubble(m, auth, box)
+
         print("sending file")
 
     def sendtext(self, ui, chatbox, box, auth, user):
@@ -219,7 +237,7 @@ class interfaces:
 
         # send file
         filebutton = tk.Button(self.buttonframe, text="Send File", padx=14, font=("Poppins", 10),
-                                fg="#22223b", bg="#9a8c98", command=lambda: self.func.sendfile())
+                                fg="#22223b", bg="#9a8c98", command=lambda: self.func.sendfile(self, chatbox, chatframe, auth, user))
         filebutton.pack(side=tk.TOP, anchor=tk.SW)
 
         # refresh

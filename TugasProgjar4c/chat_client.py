@@ -60,7 +60,7 @@ class ChatClient:
                 print(filepath)
 
                 data = open(filepath, 'rb').read()
-                print(data)
+                # print(data)
                 filedata = base64.b64encode(data)       # convert to base64
                 filedata = filedata.decode('utf-8')     # convert to str from bytes
 
