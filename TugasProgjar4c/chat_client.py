@@ -168,6 +168,17 @@ class ChatClient:
         else:
             return "Error, {}" . format(result['message'])
 
+    # get all groups
+    def getallgroups(self):
+        if (self.tokenid==""):
+            return "Error, not authorized"
+        string="getallgroups {} \r\n" . format(self.tokenid)
+        result = self.sendstring(string)
+        if result['status']=='OK':
+            return "{}" . format(json.dumps(result['grouplist']))
+        else:
+            return "Error, {}" . format(result['message'])
+
 if __name__=="__main__":
     cc = ChatClient()
     while True:

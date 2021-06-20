@@ -37,12 +37,17 @@ class functions:
         #send file function
         print("sending file")
 
-    def sendtext(self, ui, chatbox, box, auth, user):
+    def sendtext(self, ui, chatbox, box, auth, user, group=False):
         #send text function
         input = chatbox.get("1.0", "end-1c")
         print(input)
 
-        cmd = str(f"send {user} {input}")
+        # check if send to personal chat or group chat
+        if(group == False):
+            cmd = str(f"send {user} {input}")
+        else:
+            cmd = str(f"sendgroup {user} {input}")
+
         result = chatClient.proses(cmd)
         result.split()
         if result[0] == 'E':
@@ -53,9 +58,11 @@ class functions:
 
         chatbox.delete("1.0", "end-1c")
 
-    def inbox(self, ui, chatbox, box, auth, user):
+    def inbox(self, ui, chatbox, box, auth, user, group=False):
         cmd = str(f"inbox")
         result = chatClient.proses(cmd)
+
+        # check if get chat success
         if result[0] == 'E':
             print("Failed to get chat")
         else:
@@ -66,13 +73,19 @@ class functions:
             else:
                 result = result
 
-            for sender in result:
-                if(str(sender) == user):
+            # check if group chat or personal chat
+            if(group == False):
+                for sender in result:
+                    if(str(sender) == user):
+                        for i in result[sender]:
+                            input = i['msg']
+                            ui.chatbubble(input, user, box)
+            else:
+                for sender in result:
                     for i in result[sender]:
-                        input = i['msg']
-                        ui.chatbubble(input, user, box)
-
-        chatbox.delete("1.0", "end-1c")
+                        if (i['msg_to'] == user):
+                            input = i['msg']
+                            ui.chatbubble(input, str(sender), box)
 
     def creategroup(self):
         # create group function
@@ -157,6 +170,7 @@ class interfaces:
         self.rightframe.pack(side=tk.LEFT, anchor=tk.N, fill=tk.BOTH, expand=True)
 
         self.users = self.singlechat(self.leftframe, self.auth)
+        self.groups = self.singlegroupchat(self.leftframe, self.auth)
         self.newgroup(groupframe)
 
     def singlechat(self, frame, auth):
@@ -179,7 +193,7 @@ class interfaces:
 
         return users
 
-    def personalchat(self, user, auth):
+    def personalchat(self, user, auth, group=False):
         print("pc dengan ", user, " auth ", auth)
 
         content = ["Halo lagi apa?", "Udah makan belum?", "Mau minta saran dong",
@@ -214,7 +228,7 @@ class interfaces:
 
         # send text
         filebutton = tk.Button(self.buttonframe, text="Send", padx=26, font=("Poppins", 10),
-                                fg="#22223b", bg="#9a8c98", command=lambda: self.func.sendtext(self, chatbox, chatframe, auth, user))
+                                fg="#22223b", bg="#9a8c98", command=lambda: self.func.sendtext(self, chatbox, chatframe, auth, user, group))
         filebutton.pack(side=tk.TOP, anchor=tk.SW)
 
         # send file
@@ -224,8 +238,9 @@ class interfaces:
 
         # refresh
         filebutton = tk.Button(self.buttonframe, text="Refresh Chat", padx=0, font=("Poppins", 10),
-                               fg="#22223b", bg="#9a8c98", command=lambda: self.func.inbox(self, chatbox, chatframe, auth, user))
+                               fg="#22223b", bg="#9a8c98", command=lambda: self.func.inbox(self, chatbox, chatframe, auth, user, group))
         filebutton.pack(side=tk.TOP, anchor=tk.SW)
+        self.func.inbox(self, chatbox, chatframe, auth, user, group)
 
     def chatbubble(self, content, name, box):
         if not content.isspace() and content.strip() != '':
@@ -290,6 +305,19 @@ class interfaces:
         groupbutton.pack(side=tk.TOP, anchor=tk.NW, fill=tk.X, padx=10, pady=5)
 
         self.func.creategroup()
+
+    def singlegroupchat(self, frame, auth):
+        groupbutton = []
+
+        groups = chatClient.proses("getallgroups")
+        groups = json.loads(groups)
+
+        for x in range(len(groups)):
+            groupbutton.append(tk.Button(frame, text=groups[x], anchor='w',
+                                        command=lambda y=groups[x]: self.personalchat(y, auth, group=True)))
+            groupbutton[x].pack(side=tk.TOP, anchor=tk.NW, fill=tk.X, padx=10, pady=5)
+
+        return groups
 
 if __name__=="__main__":
     root.title("Chat App")
