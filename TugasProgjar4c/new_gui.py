@@ -179,9 +179,9 @@ class interfaces:
                                    text="Group chat", bg="#c9ada7")
 
         # new group button
-        newgroup = tk.Button(self.leftframe, text="New Group", padx=5, font=("Poppins", 10),
-                             fg="#22223b", bg="#9a8c98", command=lambda: self.grouptoggle(groupframe))
-        newgroup.pack(side=tk.BOTTOM, anchor=tk.S, pady=5)
+        # newgroup = tk.Button(self.leftframe, text="New Group", padx=5, font=("Poppins", 10),
+        #                      fg="#22223b", bg="#9a8c98", command=lambda: self.grouptoggle(groupframe))
+        # newgroup.pack(side=tk.BOTTOM, anchor=tk.S, pady=5)
 
         # right frame
         self.rightframe = tk.Frame(self.frame, height=100, width=150, bg="#4a4e69")
